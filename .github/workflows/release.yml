@@ -1,0 +1,90 @@
+name: Publish Windows beta
+
+on:
+  push:
+    branches: [main]
+    paths: [".github/workflows/release.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: chatguard-local-v1.0.0-beta-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source and compile Windows helper
+        run: |
+          go test ./host
+          go build -o /tmp/chatguard-test-host ./host
+          CHATGUARD_HOST_TEST_BIN=/tmp/chatguard-test-host npm test
+          mkdir -p dist/package/ChatGuardLocal/host
+          GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -trimpath -ldflags='-s -w' -o dist/package/ChatGuardLocal/host/ChatGuardLocalHost.exe ./host
+      - name: Package and checksum
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib,zipfile
+          root=Path('dist/package/ChatGuardLocal')
+          files=['CHANGELOG.md','CONTRIBUTING.md','DISINSTALLA.cmd','INSTALLA.cmd','Install-ChatGuardLocal.ps1','LICENSE','README.en.md','README.md','SECURITY.md','THIRD_PARTY_NOTICES.txt','Uninstall-ChatGuardLocal.ps1','go.mod']
+          files += [str(p) for d in ['extension','scripts'] for p in Path(d).rglob('*') if p.is_file()]
+          files += [str(p) for p in Path('host').glob('*.go')]
+          for name in files:
+              dest=root/name
+              dest.parent.mkdir(parents=True,exist_ok=True)
+              dest.write_bytes(Path(name).read_bytes())
+          archive=Path('dist/ChatGuardLocal_v1.0.0_beta_Windows.zip')
+          with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
+              for p in sorted(root.rglob('*')):
+                  if p.is_file(): z.write(p,p.relative_to(root.parent).as_posix())
+          with zipfile.ZipFile(archive) as z:
+              assert z.testzip() is None
+              assert 'ChatGuardLocal/host/ChatGuardLocalHost.exe' in z.namelist()
+              assert 'ChatGuardLocal/extension/manifest.json' in z.namelist()
+              assert 'ChatGuardLocal/INSTALLA.cmd' in z.namelist()
+          digest=hashlib.sha256(archive.read_bytes()).hexdigest()
+          Path('dist/SHA256SUMS.txt').write_text(f'{digest}  {archive.name}\n')
+          PY
+      - name: Create GitHub prerelease with ZIP and SHA256
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view v1.0.0-beta >/dev/null 2>&1; then
+            echo 'Release already exists; refusing to replace it.'
+            exit 0
+          fi
+          cat > /tmp/notes.md <<'NOTES'
+          ## ChatGuard Local 1.0.0-beta — Windows / Brave / Chrome
+
+          Prima beta pubblica gratuita e open source (MIT).
+
+          - Backup automatici delle conversazioni ChatGPT **aperte nel browser** tramite programma locale Windows.
+          - Nessuna finestra di download del browser; cartella principale configurabile.
+          - ZIP versionati con JSON, CSV, Markdown e allegati recuperabili.
+          - Segnalazione dei backup parziali e degli allegati mancanti.
+
+          **Installazione**
+          1. Scarica ed estrai lo ZIP in una cartella permanente.
+          2. Apri brave://extensions o chrome://extensions, abilita Modalità sviluppatore e carica la cartella ChatGuardLocal/extension.
+          3. Copia l'ID dell'estensione; avvia ChatGuardLocal/INSTALLA.cmd come utente normale (non amministratore).
+          4. Inserisci l'ID, scegli la cartella principale, verifica il collegamento dalle impostazioni e prova Salva adesso.
+
+          **Attenzione**: beta non ancora certificata su tutte le configurazioni Windows/Brave. Non esegue il backup di tutte le conversazioni chiuse. Gli allegati non accessibili restano mancanti; gli archivi ZIP non sono cifrati. Non disattivare le protezioni Windows per eseguire il programma non firmato.
+
+          Verifica il file SHA256SUMS.txt dopo aver scaricato lo ZIP. Non pubblicare mai backup privati nelle issue.
+          NOTES
+          gh release create v1.0.0-beta dist/ChatGuardLocal_v1.0.0_beta_Windows.zip dist/SHA256SUMS.txt --title 'ChatGuard Local v1.0.0-beta' --notes-file /tmp/notes.md --target "$GITHUB_SHA" --prerelease --latest=false
