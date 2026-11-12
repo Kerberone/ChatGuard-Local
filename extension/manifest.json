@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "ChatGuard Local — backup locale di ChatGPT",
+  "short_name": "ChatGuard Local",
+  "version": "1.0.0",
+  "minimum_chrome_version": "116",
+  "description": "Snapshot locali di conversazioni ChatGPT con allegati recuperabili, tramite host Windows. Non usa i download del browser.",
+  "permissions": [
+    "alarms",
+    "nativeMessaging",
+    "storage",
+    "tabs",
+    "scripting",
+    "offscreen",
+    "unlimitedStorage"
+  ],
+  "host_permissions": [
+    "https://chatgpt.com/*",
+    "https://chat.openai.com/*",
+    "https://*.oaiusercontent.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*"
+      ],
+      "js": [
+        "lib.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "ChatGuard Local",
+    "default_popup": "popup.html"
+  },
+  "options_page": "options.html"
+}

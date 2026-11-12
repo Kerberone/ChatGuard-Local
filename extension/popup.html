@@ -1,0 +1,10 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ChatGuard Local</title><link rel="stylesheet" href="ui.css"></head>
+<body class="popup">
+<header><div class="logo">C</div><div><h1>ChatGuard Local 1.0.0</h1><p>Conversazioni e allegati locali</p></div></header>
+<div class="state"><span id="dot" class="dot"></span><strong id="stateLabel">Caricamento...</strong><span id="openChats" class="count"></span></div>
+<div class="grid"><div class="stat"><span>Snapshot salvati</span><strong id="total">–</strong></div><div class="stat"><span>Ultimo backup</span><strong id="latest">–</strong></div></div>
+<div id="destination" class="folder-status"></div><div id="warning" class="warning" hidden></div>
+<div class="actions"><button id="now" class="primary">Salva adesso</button><button id="settings">Impostazioni</button></div>
+<section><h2>Ultime conversazioni</h2><div id="recent" class="recent"><p>Nessun backup ancora salvato.</p></div></section>
+<footer>I backup incompleti sono segnalati. Brave deve essere aperto, con il programma locale installato.</footer>
+<script src="popup.js"></script></body></html>

@@ -1,0 +1,11 @@
+{
+  "name": "chatguard-local",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Local ChatGPT conversation backup extension with Windows native messaging",
+  "scripts": {
+    "test": "node --test tests/*.test.cjs"
+  },
+  "license": "MIT",
+  "engines": { "node": ">=20" }
+}

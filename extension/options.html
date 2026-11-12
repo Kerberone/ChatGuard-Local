@@ -1,0 +1,33 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Impostazioni — ChatGuard Local</title><link rel="stylesheet" href="ui.css"></head>
+<body class="options"><main>
+<header><div class="logo">C</div><div><h1>ChatGuard Local 1.0.0</h1><p>Backup locali senza download del browser</p></div></header>
+<p class="intro">Gli snapshot vengono scritti da ChatGuard Local Host direttamente sul disco e restano indipendenti dalla cronologia online.</p>
+<div class="panel">
+  <section class="destination"><h2>Programma locale Windows</h2>
+    <div id="nativeStatus" class="folder-status">Verifica collegamento in corso...</div>
+    <div class="actions"><button id="checkNative" class="primary">Verifica collegamento</button><button id="chooseFolder">Cambia cartella principale...</button></div>
+    <p class="hint">La cartella viene scelta con una finestra di Windows. Se il programma non è collegato, esegui INSTALLA.cmd dal pacchetto e inserisci l'ID visibile in brave://extensions. Nessuna modifica è necessaria alle autorizzazioni dei download di Brave.</p>
+  </section>
+  <label class="toggle"><input type="checkbox" id="enabled" checked><span><strong>Backup automatico attivo</strong><small>Funziona con Brave aperto e la chat presente in una scheda</small></span></label>
+  <label class="control">Frequenza dei salvataggi
+    <select id="interval"><option value="3">Ogni 3 minuti</option><option value="5">Ogni 5 minuti</option><option value="10">Ogni 10 minuti</option><option value="15">Ogni 15 minuti</option><option value="30">Ogni 30 minuti</option><option value="60">Ogni ora</option></select>
+  </label>
+  <label class="toggle"><input type="checkbox" id="liveCapture" checked><span><strong>Salva anche dopo nuovi messaggi</strong><small>Rileva i cambiamenti e archivia le versioni modificate</small></span></label>
+  <label class="control">Sottocartella all'interno della directory principale
+    <input id="folder" type="text" value="ChatGPT_Backups" autocomplete="off" spellcheck="false">
+    <small>Esempio: cartella scelta / ChatGPT_Backups / Conversazione / snapshot_....zip</small>
+  </label>
+  <div class="two"><label class="toggle"><input type="checkbox" checked disabled><span><strong>JSON originale</strong><small>Sempre incluso, con i rami disponibili</small></span></label>
+  <label class="toggle"><input type="checkbox" id="saveCSV" checked><span><strong>CSV cronologico</strong><small>Esporta i messaggi con date e ruoli</small></span></label></div>
+  <div class="two"><label class="toggle"><input type="checkbox" id="saveMD" checked><span><strong>Markdown leggibile</strong><small>Con date e riferimenti ai file</small></span></label>
+  <label class="toggle"><input type="checkbox" id="saveAssets" checked><span><strong>Includi file originali</strong><small>Immagini, ZIP, PDF e altri allegati recuperabili</small></span></label></div>
+  <div class="actions"><button id="save" class="primary">Salva impostazioni</button><button id="backup">Salva tutte le chat aperte</button></div>
+  <div id="message" class="message" role="status" aria-live="polite"></div>
+</div>
+<section class="notes"><h2>Affidabilità e limiti</h2>
+<p><strong>Nessuna finestra «Salva con nome»:</strong> non utilizziamo le funzioni di download del browser. Il programma locale verifica che il file ZIP sia integro prima di confermare il backup.</p>
+<p>Dentro ogni ZIP trovi <strong>conversazione.json</strong>, <strong>stato_backup.json</strong>, il CSV, il Markdown e gli allegati effettivamente recuperati. Lo stato sarà <strong>PARZIALE</strong> se mancano file, se l'API non fornisce tutta la cronologia o se alcuni link sono solo temporanei.</p>
+<p><strong>Solo le chat aperte:</strong> la versione 1.0 non percorre automaticamente tutte le vecchie conversazioni nell'account. I file già scomparsi dal server non possono essere recuperati dall'estensione. Gli endpoint interni di ChatGPT possono cambiare. Non rendere pubblici gli ZIP, perché contengono anche dati personali e metadati.</p>
+</section>
+</main><script src="options.js"></script></body></html>

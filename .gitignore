@@ -1,0 +1,14 @@
+# Compiled executables; distributed separately as verified release assets
+*.exe
+*.dll
+*.pdb
+*.test
+# Local installation files, IDs and conversation backups
+config.json
+host-manifest.json
+ChatGPT_Backups/
+*.zip
+*.tmp
+.env*
+node_modules/
+.DS_Store
